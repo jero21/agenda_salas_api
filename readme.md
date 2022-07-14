@@ -7,6 +7,11 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
 </p>
 
+## Requisitos
+
+- PHP 7 
+- Composer >= 2.2.13 
+
 ## Configurar Variales de entorno de BD en archivo .env
 
 ```
