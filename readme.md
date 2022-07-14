@@ -28,4 +28,4 @@ $ php artisan jwt:secret
 ## Carpeta de proyecto debe estar en servidor apache
 
 Los servicios del frontend debe apuntar a la ruta: http://IP_SERVIDOR/apis/NOMBRE_CARPETA_BACKEND/public/api/
-Ejemplo: http://172.17.24.10/apis/api_agenda_temuco/public/api/
+Ejemplo: http://172.17.24.10/apis/agenda_salas_temuco_backend/public/api/
