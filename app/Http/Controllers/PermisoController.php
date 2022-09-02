@@ -24,12 +24,11 @@ class PermisoController extends Controller
 
     public function store(Request $request) {
         try {
-
             $permiso = new Permiso();
             $permiso->fecha_inicio       = $request->fecha_inicio;
             $permiso->fecha_fin          = $request->fecha_fin;
-            $permiso->id_tipo_permiso    = $request->tipo_permiso;
-            $permiso->id_fiscal          = $request->fiscal;
+            $permiso->id_tipo_permiso    = $request['tipo_permiso']['id'];
+            $permiso->id_fiscal          = $request['fiscal']['id']; 
             $permiso->save();
 
             // Calcúla la diferencia de dias entre fecha_inicio y fecha_fin
@@ -50,8 +49,6 @@ class PermisoController extends Controller
                 $fechas_permiso->save();
                 $i++;
             }
-            
-
 
             return \Response::json(['create' => true, 'permiso' => $permiso], 200);
         } catch (Exception $e) {
@@ -63,6 +60,7 @@ class PermisoController extends Controller
     {
         try {
             $permiso = Permiso::find($id);
+            $fechas_permiso = FechasPermiso::where('id_permiso', $permiso->id)->delete();
             $permiso->delete();
 
             return \Response::json(['delete' => true], 200);

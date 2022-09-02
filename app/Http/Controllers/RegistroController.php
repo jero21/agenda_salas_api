@@ -47,26 +47,26 @@ class RegistroController extends Controller
      */
     public function store(Request $request)
     {
-
         try {
             $registro = new Registro();
             $registro->start        = $request->start;
             $registro->end          = $request->start;
             $registro->detail       = $request->detail;
-            $registro->id_tipo_sala = $request->sala;
-            $registro->id_fiscal    = $request->fiscal;
+            $registro->id_tipo_sala = $request['sala']['id'];
+            $registro->id_fiscal    = $request['fiscal']['id'];
             $registro->save();
 
-            $sala = TipoSala::find($request->sala);
-            $fiscal = Fiscal::find($request->fiscal);
+            $sala = TipoSala::find($request['sala']['id']);
+            $fiscal = Fiscal::find($request['fiscal']['id']);
 
             $registro_fecha_excel = ExcelRegistroPorFecha::where('fecha', '=' ,$request->start)->first();
             if ($registro_fecha_excel) {
 
                 $registro_sala = new ExcelRegistroSala();
                 $registro_sala->sala         = $sala->nombre;
-                $registro_sala->fiscal         = $fiscal->nombre;
+                $registro_sala->fiscal       = $fiscal->nombre;
                 $registro_sala->id_excel_registro_por_fecha = $registro_fecha_excel->id;
+                $registro_sala->id_registro    = $registro->id;
                 $registro_sala->save();
 
             } else {
@@ -76,11 +76,57 @@ class RegistroController extends Controller
 
                 $registro_sala = new ExcelRegistroSala();
                 $registro_sala->sala         = $sala->nombre;
-                $registro_sala->fiscal         = $fiscal->nombre;
+                $registro_sala->fiscal       = $fiscal->nombre;
                 $registro_sala->id_excel_registro_por_fecha = $registro_fecha->id;
+                $registro_sala->id_registro    = $registro->id;
                 $registro_sala->save();
             }
             
+            if ($request->email) {
+                $this->enviarEmail($sala->nombre, $fiscal->username, $request->start);
+            }
+            return \Response::json(['create' => true, 'registro' => $registro], 200);
+        } catch (Exception $e) {
+            return \Response::json(['create' => false, 'error' => $e], 500);
+        }
+    }
+
+
+    public function update($id, Request $request)
+    {
+        try {
+            $registro = Registro::find($request->id);
+            $registro->detail       = $request->detail;
+
+            if (is_array($request->sala)) {
+                $registro->id_tipo_sala = $request['sala']['id'];
+                $sala_nombre = TipoSala::find($request['sala']['id']);
+                $sala = $sala_nombre->nombre;
+            } else {
+                $sala_id = TipoSala::where('nombre', $request->sala)->first();
+                $registro->id_tipo_sala = $sala_id->id;
+                $sala = $request->sala;
+            }
+
+            if (is_array($request->fiscal)) {
+                $registro->id_fiscal = $request['fiscal']['id'];
+                $fiscal_nombre = Fiscal::find($request['fiscal']['id']);
+                $fiscal = $fiscal_nombre->nombre;
+            } else {
+                $fiscal_id = Fiscal::where('nombre', $request->fiscal)->first();
+                $registro->id_fiscal = $fiscal_id->id;
+                $fiscal = $request->fiscal;
+            }
+
+            $registro->save();
+
+            $registro_sala = ExcelRegistroSala::where('id_registro', '=' , $registro->id)->first();
+            if ($registro_sala) {
+                $registro_sala->sala         = $sala;
+                $registro_sala->fiscal       = $fiscal;
+                $registro_sala->save();
+
+            } 
             if ($request->email) {
                 $this->enviarEmail($sala->nombre, $fiscal->username, $request->start);
             }
@@ -99,6 +145,9 @@ class RegistroController extends Controller
     public function destroy($id)
     {
         try {
+
+            $registroExcel = ExcelRegistroSala::where('id_registro', $id)->delete();
+
             $registro = Registro::find($id);
             $registro->delete();
 
@@ -113,8 +162,7 @@ class RegistroController extends Controller
         $date = Carbon::parse($fecha)->format('d-m-Y');
 
         $from = "noreply@minpublico.cl";
-        //$to = $fiscal."@minpublico.cl";
-        $to = "jmorac@minpublico.cl";
+        $to = $fiscal."@minpublico.cl";
         $subject = "AGENDA TEMUCO";
         $message = "Se informa que le fue asignaa la sala <b>" . $sala . "</b> para el <b>" . $date . "</b>";
         $headers = "Content-Type: text/html; charset=UTF-8";

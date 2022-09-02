@@ -17,18 +17,17 @@ class FiscalController extends Controller
      */
     public function index()
     {
-        return Fiscal::all();
+        return Fiscal::select('id', 'nombre', 'activo')->orderBy('nombre')->get();
     }
 
     public function show($id)
     {
         return Fiscal::find($id);
-
     }
 
     public function fiscalesActivos()
     {
-        return Fiscal::where('activo', 1)->get();
+        return Fiscal::where('activo', 1)->orderBy('nombre')->get();
     }
 
     public function fiscalesByDate($date)
@@ -41,6 +40,7 @@ class FiscalController extends Controller
             ->where('registro.start', '=', $date)
             ->orWhere('fechas_permiso.fecha', '=', $date)
             ->select('fiscal.id', 'fiscal.nombre')
+            ->orderBy('nombre')
             ->get();
 
         $fiscales = Fiscal::where('activo', 1)->get();
@@ -95,13 +95,13 @@ class FiscalController extends Controller
         }
     }
 
-    public function cargasTrabajoPorFiscal() {
-
+    public function cargasTrabajoPorFiscal($desde, $hasta) {
         try {
 
             $query = DB::table('fiscal')
                 ->select(array('fiscal.*', DB::raw('COUNT(registro.id_fiscal) as registros')))
                 ->join('registro', 'fiscal.id', '=', 'registro.id_fiscal')
+                ->whereBetween('registro.end', [$desde, $hasta])
                 ->groupBy('registro.id_fiscal')
                 ->orderBy('registros', 'desc')
                 ->get();
@@ -113,8 +113,7 @@ class FiscalController extends Controller
         }
     }
 
-    public function cargasTrabajoPorTipo() {
-
+    public function cargasTrabajoPorTipo($desde, $hasta) {
         try {
 
             $jo = DB::table('registro')
@@ -123,6 +122,7 @@ class FiscalController extends Controller
                 ->join('tipo_sala', 'registro.id_tipo_sala', '=', 'tipo_sala.id')
                 ->join('tipo_registro', 'tipo_sala.id_tipo_registro', '=', 'tipo_registro.id')
                 ->where('tipo_sala.id_tipo_registro', 1)
+                ->whereBetween('registro.end', [$desde, $hasta])
                 ->groupBy('registro.id_fiscal', 'fiscal.nombre', 'tipo_registro.nombre')
                 ->orderBy('registros', 'desc')
                 ->get();
@@ -133,6 +133,7 @@ class FiscalController extends Controller
                 ->join('tipo_sala', 'registro.id_tipo_sala', '=', 'tipo_sala.id')
                 ->join('tipo_registro', 'tipo_sala.id_tipo_registro', '=', 'tipo_registro.id')
                 ->where('tipo_sala.id_tipo_registro', 2)
+                ->whereBetween('registro.end', [$desde, $hasta])
                 ->groupBy('registro.id_fiscal', 'fiscal.nombre', 'tipo_registro.nombre')
                 ->orderBy('registros', 'desc')
                 ->get();
@@ -143,6 +144,7 @@ class FiscalController extends Controller
                 ->join('tipo_sala', 'registro.id_tipo_sala', '=', 'tipo_sala.id')
                 ->join('tipo_registro', 'tipo_sala.id_tipo_registro', '=', 'tipo_registro.id')
                 ->where('tipo_sala.id_tipo_registro', 3)
+                ->whereBetween('registro.end', [$desde, $hasta])
                 ->groupBy('registro.id_fiscal', 'fiscal.nombre', 'tipo_registro.nombre')
                 ->orderBy('registros', 'desc')
                 ->get();

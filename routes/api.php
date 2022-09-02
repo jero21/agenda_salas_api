@@ -22,7 +22,7 @@ Route::get('descarga/{desde}/{hasta}', 'DescargaDatosController@descarga');
 Route::middleware(['api'])->group(function () {
     Route::get('getUser', 'AuthenticateController@getAuthUser');
 
-    Route::resource('registros', 'RegistroController')->only(['index', 'store', 'destroy']);
+    Route::resource('registros', 'RegistroController');
     Route::resource('fiscales', 'FiscalController');
     Route::resource('salas', 'TipoSalaController');
     Route::resource('tipo_permiso', 'TipoPermisoController');
@@ -33,8 +33,8 @@ Route::middleware(['api'])->group(function () {
     Route::get('permiso_fiscales_agenda', 'PermisoController@permisoFiscalAgenda');
 
     // CARGAS
-    Route::get('cargas_trabajo_fiscal', 'FiscalController@cargasTrabajoPorFiscal');
+    Route::get('cargas_trabajo_fiscal/{desde}/{hasta}', 'FiscalController@cargasTrabajoPorFiscal');
     Route::get('carga_trabajo_fiscal/{id}', 'FiscalController@cargaTrabajoFiscal');
-    Route::get('cargas_trabajo_tipo', 'FiscalController@cargasTrabajoPorTipo');
+    Route::get('cargas_trabajo_tipo/{desde}/{hasta}', 'FiscalController@cargasTrabajoPorTipo');
 
 });

@@ -28,7 +28,9 @@ class TipoSalaController extends Controller
     {
         $quitar_salas =  TipoSala::join('registro', 'registro.id_tipo_sala', '=', 'tipo_sala.id')
             ->where('registro.start', '=', $date)
-            ->select('tipo_sala.id')->get();
+            ->select('tipo_sala.id')
+            ->orderBy('nombre')
+            ->get();
 
         $salas = TipoSala::all();
         foreach ($salas as $key1 => $sala) {

@@ -16,7 +16,8 @@ class ExcelRegistroSala extends Model
     	'id',
         'sala',
         'fiscal',
-        'id_excel_registro_por_fecha'
+        'id_excel_registro_por_fecha',
+        'id_registro'
     ];
 
 }

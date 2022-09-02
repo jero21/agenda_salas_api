@@ -11,6 +11,7 @@ class TransformRegistro extends Transform {
 			'detail' 		=> $item['detail'],
 			'color' 		=> $item['color'],
 			'name' 			=> $item['name'] .  ' - ' . $item['sala'],
+			'fiscal' 		=> $item['name'],
 			'sala' 			=> $item['sala'],
 		];
 
